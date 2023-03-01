@@ -1,7 +1,6 @@
 package org.kie.kogito.serverless.workflow.examples;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.Map;
 
 import org.kie.kogito.process.Process;
 import org.kie.kogito.serverless.workflow.executor.StaticWorkflowApplication;
@@ -9,36 +8,32 @@ import org.kie.kogito.serverless.workflow.executor.StaticWorkflowExecutor;
 import org.kie.kogito.serverless.workflow.models.JsonNodeModel;
 
 import io.serverlessworkflow.api.Workflow;
-import io.serverlessworkflow.api.actions.Action;
-import io.serverlessworkflow.api.end.End;
-import io.serverlessworkflow.api.filters.StateDataFilter;
 import io.serverlessworkflow.api.functions.FunctionDefinition;
-import io.serverlessworkflow.api.functions.FunctionRef;
-import io.serverlessworkflow.api.start.Start;
-import io.serverlessworkflow.api.states.DefaultState.Type;
-import io.serverlessworkflow.api.states.OperationState;
-import io.serverlessworkflow.api.workflow.Functions;
+
+import static org.kie.kogito.serverless.workflow.fluent.DataFilterFactory.outputFilter;
+import static org.kie.kogito.serverless.workflow.fluent.WorkflowFactory.workflow;
 
 public class HelloPerson {
 
     private static final String START_STATE = "start";
-    private static final String FUNCTION_NAME = "concat";
+    private static final String FUNCTION_NAME = "name";
+    private static final String FUNCTION_SURNAME = "surname";
 
     public static void main(String[] args) {
-        // define your flow using Serverless workflow SDK 
-        Workflow workflow = new Workflow("HelloPerson", "Hello Person", "1.0", Arrays.asList(
-                new OperationState().withName(START_STATE).withType(Type.OPERATION).withStateDataFilter(new StateDataFilter().withOutput(".response"))
-                        .withActions(Arrays.asList(new Action().withFunctionRef(new FunctionRef(FUNCTION_NAME)))).withEnd(new End())))
-                                .withStart(new Start().withStateName(START_STATE))
-                                .withFunctions(new Functions(Arrays.asList(new FunctionDefinition(FUNCTION_NAME)
-                                        .withType(FunctionDefinition.Type.EXPRESSION)
-                                        .withOperation("\"My name is \"+.name"))));
+        // define your flow using Serverless workflow SDK, sequential function call 
+        Workflow workflow = workflow("HelloPerson")
+                .function(FUNCTION_NAME, FunctionDefinition.Type.EXPRESSION, "\"My name is \"+.name")
+                .function(FUNCTION_SURNAME, FunctionDefinition.Type.EXPRESSION, ".response+\" and my surname is \"+.surname")
+                .operation(START_STATE,
+                        actionFactory -> actionFactory.functionCall(FUNCTION_NAME).functionCall(FUNCTION_SURNAME),
+                        state -> state.withStateDataFilter(outputFilter(".response")))
+                .build();
 
         // create a reusable process for several executions
         Process<JsonNodeModel> process = StaticWorkflowApplication.get().process(workflow);
         // execute it with one person name
-        System.out.println(StaticWorkflowExecutor.execute(process, Collections.singletonMap("name", "Javierito")));
+        System.out.println(StaticWorkflowExecutor.execute(process, Map.of("name", "Javier", "surname", "Tirado")));
         // execute it with other person name
-        System.out.println(StaticWorkflowExecutor.execute(process, Collections.singletonMap("name", "Mark")));
+        System.out.println(StaticWorkflowExecutor.execute(process, Map.of("name", "Mark", "surname", "Proctor")));
     }
 }

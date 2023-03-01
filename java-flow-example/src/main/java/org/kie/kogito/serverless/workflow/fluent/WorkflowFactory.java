@@ -9,12 +9,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.serverlessworkflow.api.Workflow;
 import io.serverlessworkflow.api.end.End;
+import io.serverlessworkflow.api.functions.FunctionDefinition;
 import io.serverlessworkflow.api.start.Start;
 import io.serverlessworkflow.api.states.DefaultState;
 import io.serverlessworkflow.api.states.DefaultState.Type;
 import io.serverlessworkflow.api.states.InjectState;
 import io.serverlessworkflow.api.states.OperationState;
 import io.serverlessworkflow.api.transitions.Transition;
+import io.serverlessworkflow.api.workflow.Functions;
 
 public class WorkflowFactory {
 
@@ -28,6 +30,7 @@ public class WorkflowFactory {
 
     private Workflow workflow;
     private Deque<DefaultState> states = new LinkedList<>();
+    private List<FunctionDefinition> functions = new LinkedList<>();
 
     private WorkflowFactory(String id, String version) {
         this.workflow = new Workflow().withId(id).withVersion(version);
@@ -39,19 +42,30 @@ public class WorkflowFactory {
         return this;
     }
 
-    @SafeVarargs
-    public final WorkflowFactory inject(String name, JsonNode data, Consumer<InjectState>... consumers) {
-        return processState(new InjectState(name, Type.INJECT).withData(data), consumers);
+    public final WorkflowFactory inject(String name, JsonNode data) {
+        return inject(name, data, c -> {
+        });
     }
 
-    @SafeVarargs
-    public final WorkflowFactory operation(String name, Consumer<OperationState>... consumers) {
-        return processState(new OperationState().withName(name).withType(Type.OPERATION), consumers);
+    public final WorkflowFactory inject(String name, JsonNode data, Consumer<InjectState> consumer) {
+        return processState(new InjectState(name, Type.INJECT).withData(data), consumer);
     }
 
-    private <T extends DefaultState> WorkflowFactory processState(T state, Consumer<T>... consumers) {
-        for (Consumer<T> consumer : consumers)
-            consumer.accept(state);
+    public final WorkflowFactory operation(String name, Consumer<ActionFactory> actionFactoryConsumer, Consumer<OperationState> consumer) {
+        OperationState state = new OperationState().withName(name).withType(Type.OPERATION);
+        ActionFactory actionFactory = new ActionFactory(state);
+        actionFactoryConsumer.accept(actionFactory);
+        processState(state, consumer);
+        return this;
+    }
+
+    public final WorkflowFactory operation(String name, Consumer<ActionFactory> actionFactory) {
+        return operation(name, actionFactory, c -> {
+        });
+    }
+
+    private <T extends DefaultState> WorkflowFactory processState(T state, Consumer<T> consumer) {
+        consumer.accept(state);
         if (!states.isEmpty()) {
             states.getLast().setTransition(new Transition().withNextState(state.getName()));
         }
@@ -63,7 +77,20 @@ public class WorkflowFactory {
         workflow.withStart(new Start().withStateName(states.getFirst().getName()));
         states.getLast().setEnd(new End());
         workflow.withStates((List) states);
+        workflow.withFunctions(new Functions(functions));
         return workflow;
+    }
+
+    public final WorkflowFactory function(String functionName, FunctionDefinition.Type type, String operation) {
+        return function(functionName, type, operation, c -> {
+        });
+    }
+
+    public final WorkflowFactory function(String functionName, FunctionDefinition.Type type, String operation, Consumer<FunctionDefinition> consumer) {
+        FunctionDefinition functionDef = new FunctionDefinition(functionName).withType(type).withOperation(operation);
+        consumer.accept(functionDef);
+        functions.add(functionDef);
+        return this;
     }
 
 }

@@ -12,11 +12,11 @@ import static org.kie.kogito.serverless.workflow.fluent.WorkflowFactory.workflow
 
 public class HelloWorld {
 
-    //private static final String START_STATE = "start";
+    private static final String START_STATE = "start";
 
     public static void main(String[] args) {
         // define your flow using Fluent version Serverless workflow SDK 
-        Workflow workflow = workflow("HelloWorld").inject("HelloWorld", new TextNode("Hello World!!!")).build();
+        Workflow workflow = workflow("HelloWorld").inject(START_STATE, new TextNode("Hello World!!!")).build();
         /*
          * this is equivalent to raw version of Serverless workflow sdk
          * new Workflow("HelloWorld", "Hello World", "1.0", Arrays.asList(
