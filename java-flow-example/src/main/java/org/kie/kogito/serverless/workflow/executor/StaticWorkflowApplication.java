@@ -32,6 +32,10 @@ public class StaticWorkflowApplication extends StaticApplication implements Auto
     private Vertx vertx = Vertx.vertx();
     private WebClient client;
 
+    public static StaticWorkflowApplication create() {
+        return new StaticWorkflowApplication();
+    }
+
     private StaticWorkflowApplication() {
         super(new StaticConfig(new Addons(Collections.emptySet()), new StaticProcessConfig()));
         client = WebClient.create(vertx);
@@ -53,14 +57,9 @@ public class StaticWorkflowApplication extends StaticApplication implements Auto
         return processInstance.variables();
     }
 
-    public static StaticWorkflowApplication create() {
-        return new StaticWorkflowApplication();
-    }
-
     public Process<JsonNodeModel> process(Workflow workflow) {
         return processes.map.computeIfAbsent(getKey(workflow), k -> new StaticWorkflowProcess(this, handlers, ServerlessWorkflowParser
                 .of(workflow, JavaKogitoBuildContext.builder().build()).getProcessInfo().info()));
-
     }
 
     private static String getKey(Workflow workflow) {
@@ -94,5 +93,4 @@ public class StaticWorkflowApplication extends StaticApplication implements Auto
         client.close();
         vertx.closeAndAwait();
     }
-
 }

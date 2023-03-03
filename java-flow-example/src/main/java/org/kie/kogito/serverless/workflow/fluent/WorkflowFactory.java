@@ -1,5 +1,6 @@
 package org.kie.kogito.serverless.workflow.fluent;
 
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.serverlessworkflow.api.Workflow;
+import io.serverlessworkflow.api.actions.Action;
 import io.serverlessworkflow.api.end.End;
 import io.serverlessworkflow.api.functions.FunctionDefinition;
 import io.serverlessworkflow.api.start.Start;
@@ -58,21 +60,29 @@ public class WorkflowFactory {
         return processState(new InjectState(name, Type.INJECT).withData(data), consumer);
     }
 
-    public final WorkflowFactory operation(String name, Consumer<ActionFactory> actionFactoryConsumer, Consumer<OperationState> consumer) {
-        OperationState state = new OperationState().withName(name).withType(Type.OPERATION);
-        ActionFactory actionFactory = new ActionFactory(state);
+    public final WorkflowFactory operation(String name, Consumer<ActionFactory<OperationState>> actionFactoryConsumer, Consumer<OperationState> consumer) {
+        List<Action> actions = new ArrayList<>();
+        OperationState state = new OperationState().withName(name).withType(Type.OPERATION).withActions(actions);
+        ActionFactory<OperationState> actionFactory = new ActionFactory<>(state, actions);
         actionFactoryConsumer.accept(actionFactory);
         processState(state, consumer);
         return this;
     }
 
-    public final WorkflowFactory parallel(String name, Consumer<ParallelState> consumer) {
+    public final WorkflowFactory parallel(String name, Consumer<BranchFactory> branchFactoryConsumer) {
+        return parallel(name, branchFactoryConsumer, c -> {
+        });
+    }
+
+    public final WorkflowFactory parallel(String name, Consumer<BranchFactory> actionFactoryConsumer, Consumer<ParallelState> consumer) {
         ParallelState state = new ParallelState().withName(name).withType(Type.PARALLEL);
-        consumer.accept(state);
+        BranchFactory actionFactory = new BranchFactory(state);
+        actionFactoryConsumer.accept(actionFactory);
+        processState(state, consumer);
         return this;
     }
 
-    public final WorkflowFactory operation(String name, Consumer<ActionFactory> actionFactory) {
+    public final WorkflowFactory operation(String name, Consumer<ActionFactory<OperationState>> actionFactory) {
         return operation(name, actionFactory, c -> {
         });
     }
