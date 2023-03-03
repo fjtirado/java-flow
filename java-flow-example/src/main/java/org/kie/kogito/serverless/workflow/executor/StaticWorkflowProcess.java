@@ -1,10 +1,13 @@
 package org.kie.kogito.serverless.workflow.executor;
 
+import java.util.Collection;
+
 import org.kie.api.definition.process.Process;
 import org.kie.api.runtime.process.WorkflowProcessInstance;
 import org.kie.kogito.Application;
 import org.kie.kogito.Model;
 import org.kie.kogito.correlation.CompositeCorrelation;
+import org.kie.kogito.internal.process.runtime.KogitoWorkItemHandler;
 import org.kie.kogito.internal.process.runtime.KogitoWorkflowProcess;
 import org.kie.kogito.process.ProcessInstance;
 import org.kie.kogito.process.impl.AbstractProcess;
@@ -14,8 +17,8 @@ class StaticWorkflowProcess extends AbstractProcess<JsonNodeModel> {
 
     private final KogitoWorkflowProcess process;
 
-    public StaticWorkflowProcess(Application app, KogitoWorkflowProcess process) {
-        this.app = app;
+    public StaticWorkflowProcess(Application app, Collection<KogitoWorkItemHandler> handlers, KogitoWorkflowProcess process) {
+        super(app, handlers, null);
         this.process = process;
     }
 

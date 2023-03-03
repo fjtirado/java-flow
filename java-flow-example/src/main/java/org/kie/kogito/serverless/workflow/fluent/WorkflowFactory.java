@@ -5,7 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.kie.kogito.jackson.utils.ObjectMapperFactory;
+
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.serverlessworkflow.api.Workflow;
 import io.serverlessworkflow.api.end.End;
@@ -15,10 +19,13 @@ import io.serverlessworkflow.api.states.DefaultState;
 import io.serverlessworkflow.api.states.DefaultState.Type;
 import io.serverlessworkflow.api.states.InjectState;
 import io.serverlessworkflow.api.states.OperationState;
+import io.serverlessworkflow.api.states.ParallelState;
 import io.serverlessworkflow.api.transitions.Transition;
 import io.serverlessworkflow.api.workflow.Functions;
 
 public class WorkflowFactory {
+
+    private static ObjectMapper mapper = ObjectMapperFactory.get();
 
     public static WorkflowFactory workflow(String id) {
         return workflow(id, "1_0");
@@ -59,6 +66,12 @@ public class WorkflowFactory {
         return this;
     }
 
+    public final WorkflowFactory parallel(String name, Consumer<ParallelState> consumer) {
+        ParallelState state = new ParallelState().withName(name).withType(Type.PARALLEL);
+        consumer.accept(state);
+        return this;
+    }
+
     public final WorkflowFactory operation(String name, Consumer<ActionFactory> actionFactory) {
         return operation(name, actionFactory, c -> {
         });
@@ -91,6 +104,10 @@ public class WorkflowFactory {
         consumer.accept(functionDef);
         functions.add(functionDef);
         return this;
+    }
+
+    public static ObjectNode objectNode() {
+        return mapper.createObjectNode();
     }
 
 }

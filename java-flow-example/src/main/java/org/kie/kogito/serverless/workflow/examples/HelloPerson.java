@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.kie.kogito.process.Process;
 import org.kie.kogito.serverless.workflow.executor.StaticWorkflowApplication;
-import org.kie.kogito.serverless.workflow.executor.StaticWorkflowExecutor;
 import org.kie.kogito.serverless.workflow.models.JsonNodeModel;
 
 import io.serverlessworkflow.api.Workflow;
@@ -20,20 +19,24 @@ public class HelloPerson {
     private static final String FUNCTION_SURNAME = "surname";
 
     public static void main(String[] args) {
-        // define your flow using Serverless workflow SDK, sequential function call 
-        Workflow workflow = workflow("HelloPerson")
-                .function(FUNCTION_NAME, FunctionDefinition.Type.EXPRESSION, "\"My name is \"+.name")
-                .function(FUNCTION_SURNAME, FunctionDefinition.Type.EXPRESSION, ".response+\" and my surname is \"+.surname")
-                .operation(START_STATE,
-                        actionFactory -> actionFactory.functionCall(FUNCTION_NAME).functionCall(FUNCTION_SURNAME),
-                        state -> state.withStateDataFilter(outputFilter(".response")))
-                .build();
 
-        // create a reusable process for several executions
-        Process<JsonNodeModel> process = StaticWorkflowApplication.get().process(workflow);
-        // execute it with one person name
-        System.out.println(StaticWorkflowExecutor.execute(process, Map.of("name", "Javier", "surname", "Tirado")));
-        // execute it with other person name
-        System.out.println(StaticWorkflowExecutor.execute(process, Map.of("name", "Mark", "surname", "Proctor")));
+        try (StaticWorkflowApplication application = StaticWorkflowApplication.create()) {
+            // define your flow using Serverless workflow SDK, sequential function call 
+
+            Workflow workflow = workflow("HelloPerson")
+                    .function(FUNCTION_NAME, FunctionDefinition.Type.EXPRESSION, "\"My name is \"+.name")
+                    .function(FUNCTION_SURNAME, FunctionDefinition.Type.EXPRESSION, ".response+\" and my surname is \"+.surname")
+                    .operation(START_STATE,
+                            actionFactory -> actionFactory.functionCall(FUNCTION_NAME).functionCall(FUNCTION_SURNAME),
+                            state -> state.withStateDataFilter(outputFilter(".response")))
+                    .build();
+
+            // create a reusable process for several executions
+            Process<JsonNodeModel> process = application.process(workflow);
+            // execute it with one person name
+            System.out.println(application.execute(process, Map.of("name", "Javier", "surname", "Tirado")));
+            // execute it with other person name
+            System.out.println(application.execute(process, Map.of("name", "Mark", "surname", "Proctor")));
+        }
     }
 }
