@@ -3,6 +3,8 @@ package org.kie.kogito.serverless.workflow.fluent;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.kie.kogito.serverless.workflow.models.JsonNodeModel;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 
@@ -10,6 +12,7 @@ import io.serverlessworkflow.api.actions.Action;
 import io.serverlessworkflow.api.branches.Branch;
 import io.serverlessworkflow.api.filters.ActionDataFilter;
 import io.serverlessworkflow.api.functions.FunctionRef;
+import io.serverlessworkflow.api.functions.SubFlowRef;
 
 public class ActionFactory<T> {
 
@@ -36,6 +39,12 @@ public class ActionFactory<T> {
         return this;
     }
 
+    public ActionFactory<T> subprocess(org.kie.kogito.process.Process<JsonNodeModel> subprocess) {
+        currentAction = new Action().withSubFlowRef(new SubFlowRef().withWorkflowId(subprocess.id()));
+        actions.add(currentAction);
+        return this;
+    }
+
     private ActionDataFilter getFilter() {
         ActionDataFilter actionFilter = null;
         if (currentAction != null) {
@@ -44,7 +53,6 @@ public class ActionFactory<T> {
                 actionFilter = new ActionDataFilter();
                 currentAction.withActionDataFilter(actionFilter);
             }
-
         }
         return actionFilter;
     }
@@ -84,4 +92,5 @@ public class ActionFactory<T> {
     public T other() {
         return parent;
     }
+
 }

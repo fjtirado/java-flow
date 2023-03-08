@@ -9,7 +9,8 @@ import org.kie.kogito.serverless.workflow.models.JsonNodeModel;
 import io.serverlessworkflow.api.Workflow;
 import io.serverlessworkflow.api.functions.FunctionDefinition.Type;
 
-import static org.kie.kogito.serverless.workflow.fluent.WorkflowFactory.*;
+import static org.kie.kogito.serverless.workflow.fluent.WorkflowFactory.objectNode;
+import static org.kie.kogito.serverless.workflow.fluent.WorkflowFactory.workflow;
 
 public class ParallelServices {
 
