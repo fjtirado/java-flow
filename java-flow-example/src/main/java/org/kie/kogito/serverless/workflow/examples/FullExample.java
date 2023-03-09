@@ -15,13 +15,16 @@ import static org.kie.kogito.serverless.workflow.fluent.DataFilterFactory.output
 import static org.kie.kogito.serverless.workflow.fluent.WorkflowFactory.args;
 import static org.kie.kogito.serverless.workflow.fluent.WorkflowFactory.workflow;
 
-public class SubProcessExample {
+public class FullExample {
 
     private static final String START_STATE = "START";
+    private static final String CHECK_AGE_STATE = "CHECK_AGE";
     private static final String AGE_FUNCTION = "GET_AGE";
     private static final String PERSON_COUNTRY_ID_FUNCTION = "GET_COUNTRY_ID";
     private static final String COUNTRY_ID_NAME_FUNCTION = "GET_COUNTRY_NAME";
     private static final String GENDER_FUNCTION = "GET_GENDER";
+    private static final String UNIVERSITY_FUNCTION = "GET_UNIVERSITY";
+    private static final String WEATHER_FUNCTION = "GET_WEATHER";
 
     public static void main(String[] args) {
         try (StaticWorkflowApplication application = StaticWorkflowApplication.create()) {
@@ -38,18 +41,30 @@ public class SubProcessExample {
                     .build());
 
             Workflow flow = workflow("FullExample").function(AGE_FUNCTION, Type.CUSTOM, "rest:get:https://api.agify.io:80/?name={name}")
+                    .constant("apiKey", "2482c1d33308a7cffedff5764e9ef203")
                     .function(GENDER_FUNCTION, Type.CUSTOM, "rest:get:https://api.genderize.io:80/?name={name}")
+                    .function(UNIVERSITY_FUNCTION, Type.CUSTOM, "rest:get:http://universities.hipolabs.com:80/search?country={country}")
+                    .function(WEATHER_FUNCTION, Type.CUSTOM, "rest:get:https://api.openweathermap.org:80/data/2.5/weather?lat={lat}&lon={lon}&appid={appid}")
                     .parallel(START_STATE,
                             branchFactory -> branchFactory.branch().functionCall(AGE_FUNCTION, nameArgs).resultFilter("{age}").other()
                                     .branch().subprocess(subprocess).other()
                                     .branch().functionCall(GENDER_FUNCTION, nameArgs).resultFilter("{gender}"))
+                    .split(CHECK_AGE_STATE, factory -> factory
+                            .ifThen(".age<50")
+                            .operation(UNIVERSITY_FUNCTION, actionFactory -> actionFactory
+                                    .functionCall(UNIVERSITY_FUNCTION, args().put("country", ".country.name"))
+                                    .resultFilter(".[].name").outputFilter(".universities"))
+                            .orElse()
+                            .operation(WEATHER_FUNCTION, actionFactory -> actionFactory
+                                    .functionCall(WEATHER_FUNCTION, args().put("lat", ".country.latitude").put("lon", ".country.longitude").put("appid", "$CONST.apiKey"))
+                                    .resultFilter("{weather:.main}")))
                     .build();
             // create a reusable process for several executions
             Process<JsonNodeModel> process = application.process(flow);
             // execute it with one person name
-            System.out.println(application.execute(process, Map.of("name", "Javier")));
+            System.out.println(application.execute(process, Map.of("name", "Javier")).getWorkflowdata());
             // execute it with another person name
-            System.out.println(application.execute(process, Map.of("name", "Ricardo")));
+            System.out.println(application.execute(process, Map.of("name", "Alba")).getWorkflowdata());
         }
     }
 
