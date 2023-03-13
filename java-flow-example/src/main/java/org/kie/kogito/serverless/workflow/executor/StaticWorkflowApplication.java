@@ -65,7 +65,7 @@ public class StaticWorkflowApplication extends StaticApplication implements Auto
 
     private Process<JsonNodeModel> createProcess(Workflow workflow) {
         StaticWorkflowProcess process = new StaticWorkflowProcess(this, handlers, ServerlessWorkflowParser
-                .of(workflow, JavaKogitoBuildContext.builder().build()).getProcessInfo().info());
+                .of(workflow, JavaKogitoBuildContext.builder().withApplicationProperties(System.getProperties()).build()).getProcessInfo().info());
         WorkflowProcessImpl workflowProcess = (WorkflowProcessImpl) process.get();
         workflowProcess.getNodesRecursively().forEach(node -> {
             if (node instanceof SubProcessNode) {
