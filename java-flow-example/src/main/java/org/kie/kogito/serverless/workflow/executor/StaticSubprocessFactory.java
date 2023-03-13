@@ -8,6 +8,7 @@ import org.jbpm.workflow.core.node.SubProcessFactory;
 import org.jbpm.workflow.instance.impl.NodeInstanceImpl;
 import org.kie.kogito.process.Process;
 import org.kie.kogito.process.ProcessInstance;
+import org.kie.kogito.serverless.workflow.SWFConstants;
 import org.kie.kogito.serverless.workflow.models.JsonNodeModel;
 
 public class StaticSubprocessFactory implements SubProcessFactory<JsonNodeModel> {
@@ -30,7 +31,7 @@ public class StaticSubprocessFactory implements SubProcessFactory<JsonNodeModel>
 
     public void unbind(org.kie.api.runtime.process.ProcessContext kcontext, JsonNodeModel model) {
         Map<String, Object> outputs = new HashMap<String, Object>();
-        outputs.put("workflowdata", model.getWorkflowdata());
+        outputs.put(SWFConstants.DEFAULT_WORKFLOW_VAR, model.getWorkflowdata());
         NodeIoHelper.processOutputs((NodeInstanceImpl) kcontext.getNodeInstance(), name -> outputs.get(name), name -> kcontext.getVariable(name));
     }
 }

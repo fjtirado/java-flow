@@ -6,9 +6,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jbpm.process.core.ContextContainer;
-import org.jbpm.process.core.context.variable.Variable;
-import org.jbpm.process.core.context.variable.VariableScope;
 import org.jbpm.workflow.core.impl.WorkflowProcessImpl;
 import org.jbpm.workflow.core.node.SubProcessNode;
 import org.kie.kogito.Addons;
@@ -71,15 +68,6 @@ public class StaticWorkflowApplication extends StaticApplication implements Auto
                 .of(workflow, JavaKogitoBuildContext.builder().build()).getProcessInfo().info());
         WorkflowProcessImpl workflowProcess = (WorkflowProcessImpl) process.get();
         workflowProcess.getNodesRecursively().forEach(node -> {
-            if (node instanceof ContextContainer) {
-                ContextContainer container = (ContextContainer) node;
-                VariableScope scope = (VariableScope) container.getDefaultContext(VariableScope.VARIABLE_SCOPE);
-                if (scope != null) {
-                    for (Variable variable : scope.getVariables()) {
-                        ((VariableScope) workflowProcess.getDefaultContext(VariableScope.VARIABLE_SCOPE)).addVariable(variable);
-                    }
-                }
-            }
             if (node instanceof SubProcessNode) {
                 SubProcessNode subProcess = (SubProcessNode) node;
                 subProcess.setSubProcessFactory(new StaticSubprocessFactory(processes.map.get(subProcess.getProcessId())));
