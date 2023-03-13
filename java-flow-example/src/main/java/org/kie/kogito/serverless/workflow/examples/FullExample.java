@@ -50,7 +50,7 @@ public class FullExample {
                                     .branch().subprocess(subprocess).other()
                                     .branch().functionCall(GENDER_FUNCTION, nameArgs).resultFilter("{gender}"))
                     .split(CHECK_AGE_STATE, factory -> factory
-                            .ifThen(".age<50")
+                            .when(".age<50")
                             .operation(UNIVERSITY_FUNCTION, actionFactory -> actionFactory
                                     .functionCall(UNIVERSITY_FUNCTION, args().put("country", ".country.name"))
                                     .resultFilter(".[].name").outputFilter(".universities"))

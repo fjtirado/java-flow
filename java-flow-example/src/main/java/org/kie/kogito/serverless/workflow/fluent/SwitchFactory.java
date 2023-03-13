@@ -18,7 +18,7 @@ public class SwitchFactory extends StateFactory<SwitchFactory> {
         switchState.withDataConditions(conditions);
     }
 
-    public SwitchFactory ifThen(String conditionExpr) {
+    public SwitchFactory when(String conditionExpr) {
         pendingCondition = new DataCondition().withCondition(conditionExpr);
         conditions.add((DataCondition) pendingCondition);
         return this;
