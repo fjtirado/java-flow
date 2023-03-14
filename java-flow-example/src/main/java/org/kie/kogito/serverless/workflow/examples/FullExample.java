@@ -28,11 +28,10 @@ public class FullExample {
 
     public static void main(String[] args) {
         try (StaticWorkflowApplication application = StaticWorkflowApplication.create()) {
-
             ObjectNode nameArgs = args().put("name", ".name");
             Process<JsonNodeModel> subprocess = application.process(workflow("GetCountry")
-                    .function(PERSON_COUNTRY_ID_FUNCTION, Type.CUSTOM, "rest:get:https://api.nationalize.io:80/?name={name}")
-                    .function(COUNTRY_ID_NAME_FUNCTION, Type.CUSTOM, "rest:get:https://restcountries.com:80/v3.1/alpha/{id}")
+                    .function(PERSON_COUNTRY_ID_FUNCTION, Type.CUSTOM, "rest:get:https://api.nationalize.io/?name={name}")
+                    .function(COUNTRY_ID_NAME_FUNCTION, Type.CUSTOM, "rest:get:https://restcountries.com/v3.1/alpha/{id}")
                     .operation(START_STATE,
                             actionFactory -> actionFactory.functionCall(PERSON_COUNTRY_ID_FUNCTION, nameArgs).resultFilter(".country[0].country_id").outputFilter(".id")
                                     .functionCall(COUNTRY_ID_NAME_FUNCTION, args().put("id", ".id"))
@@ -40,11 +39,11 @@ public class FullExample {
                             state -> state.withStateDataFilter(outputFilter("{country}")))
                     .build());
 
-            Workflow flow = workflow("FullExample").function(AGE_FUNCTION, Type.CUSTOM, "rest:get:https://api.agify.io:80/?name={name}")
+            Workflow flow = workflow("FullExample").function(AGE_FUNCTION, Type.CUSTOM, "rest:get:https://api.agify.io/?name={name}")
                     .constant("apiKey", "2482c1d33308a7cffedff5764e9ef203")
-                    .function(GENDER_FUNCTION, Type.CUSTOM, "rest:get:https://api.genderize.io:80/?name={name}")
-                    .function(UNIVERSITY_FUNCTION, Type.CUSTOM, "rest:get:http://universities.hipolabs.com:80/search?country={country}")
-                    .function(WEATHER_FUNCTION, Type.CUSTOM, "rest:get:https://api.openweathermap.org:80/data/2.5/weather?lat={lat}&lon={lon}&appid={appid}")
+                    .function(GENDER_FUNCTION, Type.CUSTOM, "rest:get:https://api.genderize.io/?name={name}")
+                    .function(UNIVERSITY_FUNCTION, Type.CUSTOM, "rest:get:http://universities.hipolabs.com/search?country={country}")
+                    .function(WEATHER_FUNCTION, Type.CUSTOM, "rest:get:https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={appid}")
                     .parallel(START_STATE,
                             branchFactory -> branchFactory.branch().functionCall(AGE_FUNCTION, nameArgs).resultFilter("{age}").other()
                                     .branch().subprocess(subprocess).other()
@@ -67,5 +66,4 @@ public class FullExample {
             System.out.println(application.execute(process, Map.of("name", "Alba")).getWorkflowdata());
         }
     }
-
 }
