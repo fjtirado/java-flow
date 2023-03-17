@@ -8,17 +8,16 @@ import com.fasterxml.jackson.databind.node.TextNode;
 
 import io.serverlessworkflow.api.Workflow;
 
-import static org.kie.kogito.serverless.workflow.fluent.WorkflowFactory.workflow;
+import static org.kie.kogito.serverless.workflow.fluent.StateBuilder.inject;
+import static org.kie.kogito.serverless.workflow.fluent.WorkflowBuilder.workflow;
 
 public class HelloWorld {
-
-    private static final String START_STATE = "start";
 
     public static void main(String[] args) {
         // define your flow using Fluent version Serverless workflow SDK
 
         try (StaticWorkflowApplication application = StaticWorkflowApplication.create()) {
-            Workflow workflow = workflow("HelloWorld").inject(START_STATE, new TextNode("Hello World!!!")).build();
+            Workflow workflow = workflow("HelloWorld").singleton(inject(new TextNode("Hello World!!!")));
             /*
              * this is equivalent to raw version of Serverless workflow sdk
              * new Workflow("HelloWorld", "Hello World", "1.0", Arrays.asList(
