@@ -14,8 +14,8 @@ import static org.kie.kogito.serverless.workflow.fluent.WorkflowBuilder.workflow
 
 public class HelloWorld {
 
-	private static final Logger logger = Logger.getLogger(HelloWorld.class); 
-	
+    private static final Logger logger = Logger.getLogger(HelloWorld.class);
+
     public static void main(String[] args) {
         try (StaticWorkflowApplication application = StaticWorkflowApplication.create()) {
             // define your flow using Fluent version Serverless workflow SDK
