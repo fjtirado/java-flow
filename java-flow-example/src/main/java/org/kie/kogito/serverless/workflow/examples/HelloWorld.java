@@ -2,6 +2,7 @@ package org.kie.kogito.serverless.workflow.examples;
 
 import java.util.Collections;
 
+import org.jboss.logging.Logger;
 import org.kie.kogito.serverless.workflow.executor.StaticWorkflowApplication;
 
 import com.fasterxml.jackson.databind.node.TextNode;
@@ -13,10 +14,11 @@ import static org.kie.kogito.serverless.workflow.fluent.WorkflowBuilder.workflow
 
 public class HelloWorld {
 
+	private static final Logger logger = Logger.getLogger(HelloWorld.class); 
+	
     public static void main(String[] args) {
-        // define your flow using Fluent version Serverless workflow SDK
-
         try (StaticWorkflowApplication application = StaticWorkflowApplication.create()) {
+            // define your flow using Fluent version Serverless workflow SDK
             Workflow workflow = workflow("HelloWorld").singleton(inject(new TextNode("Hello World!!!")));
             /*
              * this is equivalent to raw version of Serverless workflow sdk
@@ -25,7 +27,7 @@ public class HelloWorld {
              * .withStart(new Start().withStateName(START_STATE));
              */
             // execute it 
-            System.out.println(application.execute(workflow, Collections.emptyMap()));
+            logger.info(application.execute(workflow, Collections.emptyMap()).getWorkflowdata().toPrettyString());
         }
     }
 }
