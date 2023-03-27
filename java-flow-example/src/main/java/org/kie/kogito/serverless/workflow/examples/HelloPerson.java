@@ -17,9 +17,6 @@ import static org.kie.kogito.serverless.workflow.fluent.WorkflowBuilder.workflow
 
 public class HelloPerson {
 
-    private static final String FUNCTION_NAME = "name";
-    private static final String FUNCTION_SURNAME = "surname";
-
     private static final Logger logger = LoggerFactory.getLogger(HelloPerson.class);
 
     public static void main(String[] args) {
@@ -27,11 +24,9 @@ public class HelloPerson {
         try (StaticWorkflowApplication application = StaticWorkflowApplication.create()) {
             // This flow illustrate the usage of two consecutive function calls
             Workflow workflow = workflow("HelloPerson")
-                    .function(expr(FUNCTION_NAME, "\"My name is \"+.name"))
-                    .function(expr(FUNCTION_SURNAME, ".response+\" and my surname is \"+.surname"))
                     .singleton(operation().outputFilter(".response")
-                            .action(call(FUNCTION_NAME))
-                            .action(call(FUNCTION_SURNAME)));
+                            .action(call(expr("name", "\"My name is \"+.name")))
+                            .action(call(expr("surname", ".response+\" and my surname is \"+.surname"))));
 
             // create a reusable process for several executions
             Process<JsonNodeModel> process = application.process(workflow);
