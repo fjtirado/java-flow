@@ -32,9 +32,9 @@ import static org.kie.kogito.serverless.workflow.fluent.WorkflowBuilder.workflow
 import static org.kie.kogito.serverless.workflow.utils.ServerlessWorkflowUtils.getWorkflow;
 import static org.kie.kogito.serverless.workflow.utils.ServerlessWorkflowUtils.writeWorkflow;
 
-public class FullExample {
+public class ParallelRest {
 
-    private static final Logger logger = LoggerFactory.getLogger(FullExample.class);
+    private static final Logger logger = LoggerFactory.getLogger(ParallelRest.class);
 
     private static final String LOG_INFO = "LOG_INFO";
 
