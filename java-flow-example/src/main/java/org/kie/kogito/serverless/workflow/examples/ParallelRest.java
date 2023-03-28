@@ -1,10 +1,5 @@
 package org.kie.kogito.serverless.workflow.examples;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
 import java.util.Map;
 
 import org.kie.kogito.process.Process;
@@ -12,7 +7,6 @@ import org.kie.kogito.serverless.workflow.actions.WorkflowLogLevel;
 import org.kie.kogito.serverless.workflow.executor.StaticWorkflowApplication;
 import org.kie.kogito.serverless.workflow.fluent.FunctionBuilder.HttpMethod;
 import org.kie.kogito.serverless.workflow.models.JsonNodeModel;
-import org.kie.kogito.serverless.workflow.utils.WorkflowFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,22 +17,17 @@ import io.serverlessworkflow.api.Workflow;
 import static org.kie.kogito.serverless.workflow.fluent.ActionBuilder.call;
 import static org.kie.kogito.serverless.workflow.fluent.ActionBuilder.log;
 import static org.kie.kogito.serverless.workflow.fluent.ActionBuilder.subprocess;
-import static org.kie.kogito.serverless.workflow.fluent.FunctionBuilder.log;
 import static org.kie.kogito.serverless.workflow.fluent.FunctionBuilder.rest;
 import static org.kie.kogito.serverless.workflow.fluent.StateBuilder.operation;
 import static org.kie.kogito.serverless.workflow.fluent.StateBuilder.parallel;
 import static org.kie.kogito.serverless.workflow.fluent.WorkflowBuilder.objectNode;
 import static org.kie.kogito.serverless.workflow.fluent.WorkflowBuilder.workflow;
-import static org.kie.kogito.serverless.workflow.utils.ServerlessWorkflowUtils.getWorkflow;
-import static org.kie.kogito.serverless.workflow.utils.ServerlessWorkflowUtils.writeWorkflow;
 
 public class ParallelRest {
 
     private static final Logger logger = LoggerFactory.getLogger(ParallelRest.class);
 
-    private static final String LOG_INFO = "LOG_INFO";
-
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         try (StaticWorkflowApplication application = StaticWorkflowApplication.create()) {
             ObjectNode nameArgs = objectNode().put("name", ".name");
             // Define a subflow process that retrieve country information from the given name
@@ -56,7 +45,7 @@ public class ParallelRest {
                             // return only country field to parent flow
                             .outputFilter("{country}"));
 
-            //subflow = writeToFile(subflow, "country.sw.json");
+            //subflow = FlowWriter.writeToFile(subflow, "country.sw.json");
 
             Process<JsonNodeModel> subprocess = application.process(subflow);
             // This is the main flow, it invokes two services (one for retrieving the age and another to get the gender of the given name )and one subprocess (the country one defined above) in parallel
@@ -82,7 +71,7 @@ public class ParallelRest {
                                     .resultFilter("{weather:.main}")))
                     .build();
 
-            //subflow = writeToFile(flow, "fullexample.sw.json");
+            //flow = FlowWriter.writeToFile(flow, "fullexample.sw.json");
 
             // create a reusable process for several executions
             Process<JsonNodeModel> process = application.process(flow);
@@ -93,15 +82,4 @@ public class ParallelRest {
         }
     }
 
-    // This methods shows how to write the flow to a file and read it from such file, which might be useful to reuse the flow somewhere else
-    private static Workflow writeToFile(Workflow flow, String fileName) throws IOException {
-        try (Writer writer = new FileWriter(fileName)) {
-            writeWorkflow(flow, writer, WorkflowFormat.JSON);
-        }
-
-        try (Reader reader = new FileReader(fileName)) {
-            flow = getWorkflow(reader, WorkflowFormat.JSON);
-        }
-        return flow;
-    }
 }
