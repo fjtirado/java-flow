@@ -15,9 +15,9 @@ import static org.kie.kogito.serverless.workflow.fluent.FunctionBuilder.expr;
 import static org.kie.kogito.serverless.workflow.fluent.StateBuilder.operation;
 import static org.kie.kogito.serverless.workflow.fluent.WorkflowBuilder.workflow;
 
-public class HelloPerson {
+public class ExpressionExample {
 
-    private static final Logger logger = LoggerFactory.getLogger(HelloPerson.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExpressionExample.class);
 
     public static void main(String[] args) {
 
