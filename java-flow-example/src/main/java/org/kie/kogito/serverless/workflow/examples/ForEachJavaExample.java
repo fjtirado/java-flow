@@ -32,12 +32,12 @@ public class ForEachJavaExample {
                     // first load the message from the file and store it in message property
                     .start(operation().action(call(java("getMessage", ForEachJavaExample::addAdvice), ".fileName")))
                     // then for each element in input names concatenate it with that message
-                    .end(forEach(".names").loopVar("name").outputCollection(".messages")
+                    .next(forEach(".names").loopVar("name").outputCollection(".messages")
                             // jq expression that suffix each name with the message retrieved from the file
                             .action(call(expr("concat", ".name+.adviceMessage")))
                             // only return messages list as result of the flow
                             .outputFilter("{messages}"))
-                    .build();
+                    .end().build();
             // execute the flow passing the list of names and the file name
             logger.info(application.execute(flow, Map.of("names", Arrays.asList("Javi", "Mark", "Kris", "Alessandro"), "fileName", "message.txt")).getWorkflowdata().toPrettyString());
         }

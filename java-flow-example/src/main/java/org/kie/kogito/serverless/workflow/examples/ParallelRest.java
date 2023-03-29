@@ -33,7 +33,7 @@ public class ParallelRest {
             // Define a subflow process that retrieve country information from the given name
             Workflow subflow = workflow("GetCountry")
                     // subflow consist of just one state with two sequential actions
-                    .singleton(operation()
+                    .start(operation()
                             // call rest function to retrieve country id 
                             .action(call(rest("getCountryId", HttpMethod.get, "https://api.nationalize.io:/?name={name}"), nameArgs)
                                     // extract relevant information from the response using JQ expression
@@ -43,7 +43,8 @@ public class ParallelRest {
                                     // we are only interested in country name, longitude and latitude
                                     .resultFilter("{country: {name:.[].name.common, latitude: .[].latlng[0], longitude: .[].latlng[1] }}"))
                             // return only country field to parent flow
-                            .outputFilter("{country}"));
+                            .outputFilter("{country}"))
+                    .end().build();
 
             //subflow = FlowWriter.writeToFile(subflow, "country.sw.json");
 
@@ -62,14 +63,14 @@ public class ParallelRest {
                     // once done, logs the age (using Jq string interpolation)
                     .next(operation().action(log(WorkflowLogLevel.INFO, "\"Age is \\(.age)\"")))
                     // If age is less that fifty, retrieve the list of universities (the parameters object is built using jq expressions) 
-                    .when(".age<50").end(operation().action(call(rest("getUniversities", HttpMethod.get, "http://universities.hipolabs.com/search?country={country}"),
+                    .when(".age<50").next(operation().action(call(rest("getUniversities", HttpMethod.get, "http://universities.hipolabs.com/search?country={country}"),
                             jsonObject().put("country", ".country.name")).resultFilter(".[].name").outputFilter(".universities")))
                     // Else retrieve the weather for that country capital latitude and longitude (note how parameters are build from model info) 
-                    .or()
-                    .end(operation().action(call(rest("getWeather", HttpMethod.get, "https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={appid}"),
+                    .end().or()
+                    .next(operation().action(call(rest("getWeather", HttpMethod.get, "https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={appid}"),
                             jsonObject().put("lat", ".country.latitude").put("lon", ".country.longitude").put("appid", "$CONST.apiKey"))
                                     .resultFilter("{weather:.main}")))
-                    .build();
+                    .end().build();
 
             //flow = FlowWriter.writeToFile(flow, "fullexample.sw.json");
 

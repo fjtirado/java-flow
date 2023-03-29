@@ -18,7 +18,7 @@ public class HelloWorld {
     public static void main(String[] args) {
         try (StaticWorkflowApplication application = StaticWorkflowApplication.create()) {
             // define your flow using Fluent version Serverless workflow SDK
-            Workflow workflow = workflow("HelloWorld").singleton(inject(jsonObject().put("response", "Hello World!!!")));
+            Workflow workflow = workflow("HelloWorld").start(inject(jsonObject().put("response", "Hello World!!!"))).end().build();
             /*
              * this is equivalent to raw version of Serverless workflow sdk
              * new Workflow("HelloWorld", "Hello World", "1.0", Arrays.asList(
