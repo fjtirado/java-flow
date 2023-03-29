@@ -10,8 +10,6 @@ import org.kie.kogito.serverless.workflow.executor.StaticWorkflowApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.node.TextNode;
-
 import io.serverlessworkflow.api.Workflow;
 
 import static org.kie.kogito.serverless.workflow.fluent.ActionBuilder.call;
@@ -32,7 +30,7 @@ public class ForEachJavaExample {
             // The flow accepts a list of names and suffix them with a message read from a file 
             Workflow flow = workflow("ForEachExample")
                     // first load the message from the file and store it in message property
-                    .start(operation().action(call(java("getMessage", ForEachJavaExample::addAdvice), new TextNode(".fileName"))))
+                    .start(operation().action(call(java("getMessage", ForEachJavaExample::addAdvice), ".fileName")))
                     // then for each element in input names concatenate it with that message
                     .end(forEach(".names").loopVar("name").outputCollection(".messages")
                             // jq expression that suffix each name with the message retrieved from the file

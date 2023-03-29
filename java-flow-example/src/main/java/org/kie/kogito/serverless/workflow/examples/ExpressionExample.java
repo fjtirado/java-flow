@@ -23,10 +23,13 @@ public class ExpressionExample {
 
         try (StaticWorkflowApplication application = StaticWorkflowApplication.create()) {
             // This flow illustrate the usage of two consecutive function calls
-            Workflow workflow = workflow("HelloPerson")
-                    .singleton(operation().outputFilter(".response")
+            Workflow workflow = workflow("ExpressionExample")
+                    .singleton(operation()
                             .action(call(expr("name", "\"My name is \"+.name")))
-                            .action(call(expr("surname", ".response+\" and my surname is \"+.surname"))));
+                            .action(call(expr("surname", ".response+\" and my surname is \"+.surname")))
+                            .outputFilter(".response"));
+
+            //workflow = FlowWriter.writeToFile(workflow, "expression.sw.json");
 
             // create a reusable process for several executions
             Process<JsonNodeModel> process = application.process(workflow);

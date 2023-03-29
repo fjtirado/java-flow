@@ -8,7 +8,7 @@ import org.kie.kogito.serverless.workflow.executor.StaticWorkflowApplication;
 import io.serverlessworkflow.api.Workflow;
 
 import static org.kie.kogito.serverless.workflow.fluent.StateBuilder.inject;
-import static org.kie.kogito.serverless.workflow.fluent.WorkflowBuilder.objectNode;
+import static org.kie.kogito.serverless.workflow.fluent.WorkflowBuilder.jsonObject;
 import static org.kie.kogito.serverless.workflow.fluent.WorkflowBuilder.workflow;
 
 public class HelloWorld {
@@ -18,11 +18,11 @@ public class HelloWorld {
     public static void main(String[] args) {
         try (StaticWorkflowApplication application = StaticWorkflowApplication.create()) {
             // define your flow using Fluent version Serverless workflow SDK
-            Workflow workflow = workflow("HelloWorld").singleton(inject(objectNode().put("response", "Hello World!!!")));
+            Workflow workflow = workflow("HelloWorld").singleton(inject(jsonObject().put("response", "Hello World!!!")));
             /*
              * this is equivalent to raw version of Serverless workflow sdk
              * new Workflow("HelloWorld", "Hello World", "1.0", Arrays.asList(
-             * new InjectState(START_STATE, Type.INJECT).withData(new TextNode("Hello World!!!")).withEnd(new End())))
+             * new InjectState(START_STATE, Type.INJECT).withData(new ObjectMapper().createObjectNode().put("response","Hello World!!!")).withEnd(new End())))
              * .withStart(new Start().withStateName(START_STATE));
              */
             //workflow = FlowWriter.writeToFile(workflow, "hello.sw.json");

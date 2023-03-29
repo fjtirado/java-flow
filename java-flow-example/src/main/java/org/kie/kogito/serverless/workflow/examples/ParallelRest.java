@@ -20,7 +20,7 @@ import static org.kie.kogito.serverless.workflow.fluent.ActionBuilder.subprocess
 import static org.kie.kogito.serverless.workflow.fluent.FunctionBuilder.rest;
 import static org.kie.kogito.serverless.workflow.fluent.StateBuilder.operation;
 import static org.kie.kogito.serverless.workflow.fluent.StateBuilder.parallel;
-import static org.kie.kogito.serverless.workflow.fluent.WorkflowBuilder.objectNode;
+import static org.kie.kogito.serverless.workflow.fluent.WorkflowBuilder.jsonObject;
 import static org.kie.kogito.serverless.workflow.fluent.WorkflowBuilder.workflow;
 
 public class ParallelRest {
@@ -29,7 +29,7 @@ public class ParallelRest {
 
     public static void main(String[] args) {
         try (StaticWorkflowApplication application = StaticWorkflowApplication.create()) {
-            ObjectNode nameArgs = objectNode().put("name", ".name");
+            ObjectNode nameArgs = jsonObject().put("name", ".name");
             // Define a subflow process that retrieve country information from the given name
             Workflow subflow = workflow("GetCountry")
                     // subflow consist of just one state with two sequential actions
@@ -39,7 +39,7 @@ public class ParallelRest {
                                     // extract relevant information from the response using JQ expression
                                     .resultFilter(".country[0].country_id").outputFilter(".id"))
                             // call rest function to retrieve country information from country id
-                            .action(call(rest("getCountryInfo", HttpMethod.get, "https://restcountries.com/v3.1/alpha/{id}"), objectNode().put("id", ".id"))
+                            .action(call(rest("getCountryInfo", HttpMethod.get, "https://restcountries.com/v3.1/alpha/{id}"), jsonObject().put("id", ".id"))
                                     // we are only interested in country name, longitude and latitude
                                     .resultFilter("{country: {name:.[].name.common, latitude: .[].latlng[0], longitude: .[].latlng[1] }}"))
                             // return only country field to parent flow
@@ -63,11 +63,11 @@ public class ParallelRest {
                     .next(operation().action(log(WorkflowLogLevel.INFO, "\"Age is \\(.age)\"")))
                     // If age is less that fifty, retrieve the list of universities (the parameters object is built using jq expressions) 
                     .when(".age<50").end(operation().action(call(rest("getUniversities", HttpMethod.get, "http://universities.hipolabs.com/search?country={country}"),
-                            objectNode().put("country", ".country.name")).resultFilter(".[].name").outputFilter(".universities")))
+                            jsonObject().put("country", ".country.name")).resultFilter(".[].name").outputFilter(".universities")))
                     // Else retrieve the weather for that country capital latitude and longitude (note how parameters are build from model info) 
                     .or()
                     .end(operation().action(call(rest("getWeather", HttpMethod.get, "https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={appid}"),
-                            objectNode().put("lat", ".country.latitude").put("lon", ".country.longitude").put("appid", "$CONST.apiKey"))
+                            jsonObject().put("lat", ".country.latitude").put("lon", ".country.longitude").put("appid", "$CONST.apiKey"))
                                     .resultFilter("{weather:.main}")))
                     .build();
 
@@ -81,5 +81,4 @@ public class ParallelRest {
             logger.info(application.execute(process, Map.of("name", "Alba")).getWorkflowdata().toPrettyString());
         }
     }
-
 }
