@@ -2,8 +2,10 @@ package org.kie.kogito.serverless.workflow.examples;
 
 import java.util.Collections;
 
-import org.jboss.logging.Logger;
+
 import org.kie.kogito.serverless.workflow.executor.StaticWorkflowApplication;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.serverlessworkflow.api.Workflow;
 
@@ -13,7 +15,7 @@ import static org.kie.kogito.serverless.workflow.fluent.WorkflowBuilder.workflow
 
 public class HelloWorld {
 
-    private static final Logger logger = Logger.getLogger(HelloWorld.class);
+    private static final Logger logger = LoggerFactory.getLogger(HelloWorld.class);
 
     public static void main(String[] args) {
         try (StaticWorkflowApplication application = StaticWorkflowApplication.create()) {
