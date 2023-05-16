@@ -2,7 +2,6 @@ package org.kie.kogito.serverless.workflow.examples;
 
 import java.util.Collections;
 
-
 import org.kie.kogito.serverless.workflow.executor.StaticWorkflowApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

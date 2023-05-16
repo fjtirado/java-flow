@@ -16,6 +16,32 @@
     <impsort.goal>sort</impsort.goal>
     <encoding>UTF-8</encoding>
   </properties>
+  <repositories>
+        <repository>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Repository Group</name>
+            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>jenkins-releases</id>
+            <name>Jenkins Releases</name>
+            <url>https://repo.jenkins-ci.org/releases</url>
+        </repository>
+        <repository>
+            <id>repo.jenkins-ci.org</id>
+            <name>Jenkins Public</name>
+            <url>https://repo.jenkins-ci.org/public</url>
+        </repository>
+    </repositories>
    <dependencyManagement>
     <dependencies>
       <dependency>
@@ -30,7 +56,8 @@
   <dependencies>
     <dependency>
        <groupId>org.kie.kogito</groupId>
-       <artifactId>kogito-serverless-workflow-executor</artifactId>  
+       <artifactId>kogito-serverless-workflow-executor</artifactId>
+       <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
